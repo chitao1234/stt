@@ -117,7 +117,9 @@ def shibie(*, wav_name=None, model=None, language=None, data_type=None, wav_file
                 device=sets.get('devtype'), 
                 compute_type=sets.get('cuda_com_type'), 
                 download_root=cfg.ROOT_DIR + "/models", 
-                local_files_only= False if model.find('/')>0 else True
+                local_files_only= False if model.find('/')>0 else True,
+                cpu_threads=10,
+                num_workers=2
             )
         except Exception as e:
             err=f'从huggingface.co下载模型 {model} 失败，请检查网络连接' if model.find('/')>0 else ''
@@ -142,7 +144,8 @@ def shibie(*, wav_name=None, model=None, language=None, data_type=None, wav_file
 
         raw_subtitles = []
         for segment in segments:
-            cfg.progressbar[key]=round(segment.end/total_duration, 2)
+            progress = round(segment.end/total_duration, 2)
+            cfg.progressbar[key] = 0.99 if progress >= 1 else progress
             start = int(segment.start * 1000)
             end = int(segment.end * 1000)
             startTime = tool.ms_to_time_string(ms=start)
